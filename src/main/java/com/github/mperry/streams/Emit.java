@@ -59,4 +59,11 @@ public class Emit<I, O> extends Process<I, O> {
         }
     }
 
+    @Override
+    public Process<I, O> feed(Iterable<I> in, Stream<O> out) {
+
+        return tail.feed(in, out.append(Stream.iterableStream(head)));
+
+    }
+
 }

@@ -47,4 +47,16 @@ public class Await<I, O> extends Process<I, O> {
         return new Await<>(andThen(receive, p -> p.flatMap(f)), fallback.flatMap(f));
     }
 
+    @Override
+    public Process<I, O> feed(Iterable<I> in, Stream<O> out) {
+        Stream<I> s = Stream.iterableStream(in);
+        if (s.isEmpty()) {
+            return Process.emit(out, this);
+        } else {
+            Process<I, O> next = receive.f(s.head());
+            return next.feed(s.tail()._1(), out);
+        }
+    }
+
+
 }

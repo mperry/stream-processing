@@ -34,4 +34,9 @@ public class Halt<I, O> extends Process<I, O> {
         return new Halt<>();
     }
 
+    @Override
+    public Process<I, O> feed(Iterable<I> in, Stream<O> out) {
+        return Process.emit(out, this);
+    }
+
 }

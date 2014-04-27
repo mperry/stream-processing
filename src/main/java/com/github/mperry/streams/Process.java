@@ -45,7 +45,7 @@ public abstract class Process<I, O> {
 //        return emit(it);
 //    }
 
-//    public abstract Process<I, O> feed(Iterable<I> it);
+    public abstract Process<I, O> feed(Iterable<I> in, Stream<O> out);
 //    public abstract <O2> Process<I, O2> pipe(Process<O, O2> p2);
 
 }
