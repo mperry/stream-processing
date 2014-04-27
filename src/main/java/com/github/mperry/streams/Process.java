@@ -13,6 +13,10 @@ public abstract class Process<I, O> {
         return new Emit<I, O>(head, f);
     }
 
+    public static <I, O> Emit<I, O> emit(Iterable<O> head) {
+        return new Emit<I, O>(head);
+    }
+
     public static <I, O> Await<I, O> await(F<I, Process<I, O>> receive, Process<I, O> fallback) {
         return new Await<I, O>(receive, fallback);
     }
@@ -36,6 +40,13 @@ public abstract class Process<I, O> {
     }
 
     public abstract <O2> Process<I, O2> flatMap(F<O, Process<I, O2>> f);
+
+//    public static<I, O> Process<I, O> feed(Iterable<I> it) {
+//        return emit(it);
+//    }
+
+//    public abstract Process<I, O> feed(Iterable<I> it);
+//    public abstract <O2> Process<I, O2> pipe(Process<O, O2> p2);
 
 }
 

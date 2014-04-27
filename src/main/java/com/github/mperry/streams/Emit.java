@@ -8,7 +8,7 @@ import fj.data.Stream;
 /**
  * Created by MarkPerry on 27/04/2014.
  *
- * Emit(head,tail)indicates to the driver that the  values should be emitted to the head
+ * Emit(head,tail) indicates to the driver that the head values should be emitted to the
  * output stream, and that tail should be the next state following that.
  */
 public class Emit<I, O> extends Process<I, O> {

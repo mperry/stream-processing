@@ -10,7 +10,7 @@ import static fj.F1Functions.*;
 /**
  * Created by MarkPerry on 27/04/2014.
  *
- * Await(recv, fallback)requests a value from the input stream, indicating that recv
+ * Await(recv, fallback) requests a value from the input stream, indicating that recv
  * should be used by the driver to produce the next state, and that fallback should be
  * consulted if the input has no more elements available.
  */
