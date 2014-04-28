@@ -39,4 +39,15 @@ public class Halt<I, O> extends Process<I, O> {
         return Process.emit(out, this);
     }
 
+    @Override
+    public <I2> Process<I2, O> pipeFrom(Process<I2, I> p) {
+        return new Halt<>();
+    }
+
+    public <O2> Process<I, O2> pipeToAwait(Await<O, O2> a) {
+        return Process.<I, O>halt().pipe(a.fallback);
+
+
+    }
+
 }

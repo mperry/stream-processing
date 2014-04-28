@@ -46,7 +46,20 @@ public abstract class Process<I, O> {
 //    }
 
     public abstract Process<I, O> feed(Iterable<I> in, Stream<O> out);
-//    public abstract <O2> Process<I, O2> pipe(Process<O, O2> p2);
+
+    /**
+     * Feed the output of this `Process` as input of `p2`. The implementation
+     * will fuse the two processes, so this process will only generate
+     * values as they are demanded by `p2`.
+    */
+    public <O2> Process<I, O2> pipe(Process<O, O2> p2) {
+        return p2.pipeFrom(this);
+    }
+
+    public abstract <I2> Process<I2, O> pipeFrom(Process<I2, I> p);
+
+    public abstract <O2> Process<I, O2> pipeToAwait(Await<O, O2> p);
+
 
 }
 

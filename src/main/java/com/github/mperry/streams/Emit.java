@@ -66,4 +66,23 @@ public class Emit<I, O> extends Process<I, O> {
 
     }
 
+    @Override
+    public <I2> Process<I2, O> pipeFrom(Process<I2, I> p) {
+        return Process.emit(head, tail.pipeFrom(p));
+    }
+
+    @Override
+    public <O2> Process<I, O2> pipeToAwait(Await<O, O2> p) {
+        Stream<O> s = Stream.iterableStream(head);
+        if (s.isEmpty()) {
+            return tail.pipe(p);
+        } else {
+            O h = s.head();
+            Stream<O> t = s.tail()._1();
+            Process<O, O2> p2 = p.receive.f(h);
+            return Process.emit(t, tail).pipe(p2);
+        }
+
+    }
+
 }

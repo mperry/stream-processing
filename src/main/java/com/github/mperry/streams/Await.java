@@ -1,5 +1,6 @@
 package com.github.mperry.streams;
 
+import fj.Bottom;
 import fj.F;
 import fj.F1Functions;
 import fj.P1;
@@ -56,6 +57,19 @@ public class Await<I, O> extends Process<I, O> {
             Process<I, O> next = receive.f(s.head());
             return next.feed(s.tail()._1(), out);
         }
+    }
+
+    @Override
+    public <I2> Process<I2, O> pipeFrom(Process<I2, I> p) {
+        return p.pipeToAwait(this);
+
+    }
+
+    @Override
+    public <O2> Process<I, O2> pipeToAwait(Await<O, O2> p) {
+        // Await(F<I, Process<I, O2>>, Process<I, O2>
+        throw Bottom.error("await pipe to await");
+//        return null;
     }
 
 
