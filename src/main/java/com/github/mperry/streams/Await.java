@@ -68,9 +68,14 @@ public class Await<I, O> extends Process<I, O> {
     @Override
     public <O2> Process<I, O2> pipeToAwait(Await<O, O2> p) {
         // Await(F<I, Process<I, O2>>, Process<I, O2>
+        // TODO, exercise 1, page 329
         throw Bottom.error("await pipe to await");
 //        return null;
     }
 
+    @Override
+    public Process<I, O> repeat() {
+        return Process.await(andThen(receive, Process.repeat_()), fallback);
+    }
 
 }

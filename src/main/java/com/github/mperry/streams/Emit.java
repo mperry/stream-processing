@@ -85,4 +85,9 @@ public class Emit<I, O> extends Process<I, O> {
 
     }
 
+    @Override
+    public Process<I, O> repeat() {
+        return Process.emit(head, tail.repeat());
+    }
+
 }

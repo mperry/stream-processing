@@ -61,6 +61,18 @@ public abstract class Process<I, O> {
     public abstract <O2> Process<I, O2> pipeToAwait(Await<O, O2> p);
 
 
+    public static <I, O> Process<I, O> lift(F<I, O> f) {
+        return Process.<I, O>await((I i) -> Process.emit(Stream.stream(f.f(i))), lift(f));
+
+    }
+
+    public abstract Process<I, O> repeat();
+
+
+    public static <I, O> F<Process<I, O>, Process<I, O>> repeat_() {
+        return (p) -> p.repeat();
+    }
+
 }
 
 

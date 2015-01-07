@@ -46,8 +46,16 @@ public class Halt<I, O> extends Process<I, O> {
 
     public <O2> Process<I, O2> pipeToAwait(Await<O, O2> a) {
         return Process.<I, O>halt().pipe(a.fallback);
+    }
 
+    public <O2> Process<I, O2> pipe2(Process<O, O2> p) {
+        return null;
+    }
 
+    @Override
+    public Process<I, O> repeat() {
+        // TODO: infinitely recursive
+        return repeat();
     }
 
 }
