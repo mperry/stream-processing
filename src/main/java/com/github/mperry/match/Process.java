@@ -11,6 +11,7 @@ import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
 import static com.github.mperry.match.Await.awaiti;
 import static com.github.mperry.match.Halt.halt;
+import static fj.F1Functions.andThen;
 import static fj.data.Option.none;
 import static fj.data.Option.some;
 
@@ -229,6 +230,48 @@ public class Process<I, O> {
         );
         return Match.match(l1, h -> Halt.halt()).apply(p2);
     }
+
+    /**
+     * section 15.2.2
+     */
+    public <O2> Process<I, O2> map(F<O, O2> f) {
+        return this.pipe(lift(f));
+    }
+
+    /**
+     * section 15.2.2
+     */
+    public Process<I, O> append(Process<I, O> p) {
+        return Match.match(List.<When<Process<I, O>, Process<I, O>>>list(
+            // halt case below
+            whenClass(Emit.class, (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))),
+            whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
+
+        ), h -> halt()).apply(this);
+//        return null;
+    }
+
+    /**
+     * section 15.2.2
+     */
+    public <O2> Process<I, O2> flatMap(F<O, Process<I, O2>> f) {
+        return Match.match(List.<When<Process<I, O>, Process<I, O2>>>list(
+            whenClass(Emit.class, (Emit<I, O> e) -> f.f(e.head).append(e.tail.flatMap(f))),
+            whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, x -> x.flatMap(f))))
+        ), h -> halt()).apply(this);
+    }
+
+    /**
+     * Section 15.2.2, Exercise 15.6
+     * TODO: zipWithIndex
+     */
+
+    /**
+     * Section 15.2.2, Exercise 15.8
+     * TODO: exists
+     */
+
+
 
 
 }
