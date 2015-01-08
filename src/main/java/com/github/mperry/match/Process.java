@@ -1,11 +1,18 @@
 package com.github.mperry.match;
 
 import com.github.mperry.fj.Match;
+import com.github.mperry.fj.Util;
 import com.github.mperry.fj.When;
 import fj.*;
-import fj.data.List;
-import fj.data.Option;
+import fj.data.*;
 import fj.data.Stream;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Iterator;
+import java.util.stream.*;
 
 import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
@@ -268,10 +275,42 @@ public class Process<I, O> {
 
     /**
      * Section 15.2.2, Exercise 15.8
-     * TODO: exists
+     * We choose to emit all intermediate values, and not halt.
      */
+    public static <I> Process<I, Boolean> exists(F<I, Boolean> f) {
+        return lift(f).pipe(any());
+    }
 
+    /**
+     * Emits whether a `true` input has ever been received.
+     * */
+    public static Process<Boolean, Boolean> any() {
+        return loop(false, (b, s) -> P.p(s || b, s || b));
+    }
 
+    public static <A, B> IO<B> processFile(File f, Process<String, A> p, B acc, F2<B, A, B> g) {
+        return IOFunctions.lazy(u -> {
+            try (java.util.stream.Stream<String> s1 = Files.lines(f.toPath())) {
+                return helper(s1.iterator(), p, acc, g);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                return acc;
+            }
+        });
+    }
+
+    public static <A, B> B helper(Iterator<String> ss, Process<String, A> curr, B acc, F2<B, A, B> g) {
+        Match.match(List.list(
+                whenClass(Halt.class, h -> acc),
+                whenClass(Await.class, (Await<String, A> a) -> {
+                    Process<String, A> next = ss.hasNext() ? a.receive.f(some(ss.next())) : a.receive.f(none());
+                    return helper(ss, next, acc, g);
+                }),
+                whenClass(Emit.class, (Emit<String, A> e) -> helper(ss, e.tail, g.f(acc, e.head), g))
+        ), h -> acc).apply(curr);
+        return null;
+    }
 
 
 }

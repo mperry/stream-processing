@@ -1,9 +1,16 @@
 package com.github.mperry.match;
 
 import fj.Unit;
+import fj.data.IO;
 import fj.data.List;
 import fj.data.Stream;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static fj.data.List.list;
 import static java.lang.System.out;
@@ -65,6 +72,32 @@ public class ProcessMatchTest {
         List<Integer> l = p.apply(Stream.range(1, 10)).toList();
         out.println(l);
         assertTrue(l.equals(list(3, 5, 7, 9)));
+    }
+
+    @Test
+    public void processFile() {
+        String base = "abc.txt";
+        String filename = "test/resources/" + base;
+//        java.net.URL url = getClass().getResource(filename);
+        try {
+//            Path path1 = java.nio.file.Paths.get(url.toURI());
+            Path path2 = Paths.get(getClass().getResource("/" + base).toURI());
+            File f = path2.toFile();
+
+
+
+            Process<String, Boolean> p = Process.<String>count2().pipe(Process.exists((Integer i) -> i > 2));
+            IO<Boolean> io = Process.processFile(f, p, false, (a, b) -> a || b);
+            Boolean b = io.run();
+            System.out.println(b);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 }
