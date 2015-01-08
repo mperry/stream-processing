@@ -1,8 +1,7 @@
-package com.github.mperry.streams;
+package com.github.mperry.oo;
 
 import fj.Bottom;
 import fj.F;
-import fj.F1Functions;
 import fj.P1;
 import fj.data.Stream;
 

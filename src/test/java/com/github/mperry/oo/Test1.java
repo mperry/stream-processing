@@ -1,4 +1,4 @@
-package com.github.mperry.streams;
+package com.github.mperry.oo;
 
 /**
  * Created by MarkPerry on 27/04/2014.

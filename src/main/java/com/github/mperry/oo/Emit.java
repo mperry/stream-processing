@@ -1,4 +1,4 @@
-package com.github.mperry.streams;
+package com.github.mperry.oo;
 
 import fj.F;
 import fj.P;
