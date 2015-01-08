@@ -1,6 +1,7 @@
 package com.github.mperry.fj;
 
 import fj.F;
+import fj.P;
 import fj.data.List;
 import fj.data.Option;
 
@@ -34,7 +35,8 @@ public class Match<A, B> {
     }
 
     public B apply(A a) {
-        return applyWithoutDefault(a).orSome(other.f(a));
+        Option<B> o = applyWithoutDefault(a);
+        return o.orSome(P.lazy(u -> other.f(a)));
     }
 
     public B apply(A a, F<A, B> defaultValue) {
