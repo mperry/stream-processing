@@ -24,6 +24,18 @@ public class When<A, B> {
         return new When<A, B>(g, t);
     }
 
+    public When<A, B> append(F<A, Boolean> g, F<A, B> t) {
+        return when(a -> guard.f(a) || g.f(a), a -> guard.f(a) ? transform.f(a) : t.f(a));
+    }
+
+    public When<A, B> append(When<A, B> w) {
+        return append(w.guard, w.transform);
+    }
+
+    public When<A, B> appendClass(Class<?> clazz, F<? extends A, B> t) {
+        return append(whenClass(clazz, t));
+    }
+
     public static <A extends C, B extends A, C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<B, D> f) {
         return when((C c) -> clazz.isInstance(c), (C c) -> {
             B b = (B) c;

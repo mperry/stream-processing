@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Iterator;
 
+import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
 import static com.github.mperry.stream.Await.awaiti;
 import static com.github.mperry.stream.Halt.halt;
@@ -31,9 +32,7 @@ public class Process<I, O> {
      */
     public Stream<O> apply(Stream<I> s) {
         List<When<Process<I, O>, Stream<O>>> l = List.<When<Process<I, O>, Stream<O>>>list(
-            whenClass(Halt.class,
-                    h -> Stream.<O>nil()
-            ),
+            whenClass(Halt.class, h -> Stream.<O>nil()),
             whenClass(Await.class, (Await<I, O> a) -> {
                 if (s.isNotEmpty()) {
                     Stream<I> t = s.tail()._1();
@@ -77,7 +76,7 @@ public class Process<I, O> {
             whenClass(Await.class, (Await<I, O> a) -> {
 //                Await<I, O> a = z;
                 return Await.await((Option<I> o) ->
-                        o.isNone() ? a.receive.f(o) : repeat(original, a.receive.f(o))
+                                o.isNone() ? a.receive.f(o) : repeat(original, a.receive.f(o))
                 );
             }),
             whenClass(Emit.class, (Emit<I, O> e) -> {
@@ -221,11 +220,11 @@ public class Process<I, O> {
                 whenClass(Emit.class, (Emit<O, O2> e) -> Emit.emit(e.head, this.pipe(e.tail))),
                 whenClass(Await.class, (Await<O, O2> a) -> {
                     List<When<Process<I, O>, Process<I, O2>>> l2 = List.list(
-                        // use Halt case as the default inner match below
-                        whenClass(Emit.class, (Emit<I, O> e) -> e.tail.pipe(a.receive.f(Option.some(e.head)))),
-                        whenClass(Await.class, (Await<I, O> a2) -> {
-                            return Await.await((Option<I> o) -> a2.receive.f(o).pipe(p2));
-                        })
+                            // use Halt case as the default inner match below
+                            whenClass(Emit.class, (Emit<I, O> e) -> e.tail.pipe(a.receive.f(Option.some(e.head)))),
+                            whenClass(Await.class, (Await<I, O> a2) -> {
+                                return Await.await((Option<I> o) -> a2.receive.f(o).pipe(p2));
+                            })
                     );
                     // halt case
                     return Match.createMatch(l2, h -> Halt.<I, O>halt().pipe(a.receive.f(Option.none()))).match(this);
@@ -252,6 +251,33 @@ public class Process<I, O> {
 
         ), h -> halt()).match(this);
 //        return null;
+    }
+
+    public Process<I, O> append2(Process<I, O> p) {
+
+//        When<Process<I, O>, Process<I, O>> w = When.<Emit, Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
+//                (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))
+//        ).appendClass(Await.class,
+//                (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p)))
+//        );
+//
+//        Match.match(this, h -> halt(), w);
+
+        return Match.match(this, h -> halt(),
+            When.<Emit, Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
+                (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))
+            ).appendClass(Await.class,
+                (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p)))
+            )
+        );
+
+//        return Match.createMatch(List.<When<Process<I, O>, Process<I, O>>>list(
+//                // halt case below
+//                whenClass(Emit.class, (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))),
+//                whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
+//
+//        ), h -> halt()).match(this);
+
     }
 
     /**

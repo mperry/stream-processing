@@ -28,6 +28,11 @@ public class Match<A, B> {
         return createMatch(cases, fallback).match(a);
     }
 
+    public static <A, B> B match(A a, F<A, B> fallback, When<A, B> w) {
+        return match(a, fallback, List.list(w));
+    }
+
+
     public Option<B> matchWithoutDefault(A a) {
         return cases.foldLeft((acc, w) -> {
             if (acc.isSome()) {
@@ -47,7 +52,7 @@ public class Match<A, B> {
         return matchWithoutDefault(a).orSome(defaultValue.f(a));
     }
 
-    public Match<A, B> when(When<A, B> w) {
+    public Match<A, B> createMatch(When<A, B> w) {
         return createMatch(cases.snoc(w), other);
     }
 
