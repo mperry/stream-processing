@@ -2,6 +2,10 @@ package com.github.mperry.match;
 
 /**
  * Created by MarkPerry on 7/01/2015.
+ *
+ * Halt indicates to the driver that no more elements should be read from
+ * the input stream or emitted to the output.
+ *
  */
 public class Halt<I, O> extends Process<I, O> {
 

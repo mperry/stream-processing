@@ -5,6 +5,10 @@ import fj.data.Option;
 
 /**
  * Created by MarkPerry on 7/01/2015.
+ *
+ * Await(receive, fallback) requests a value from the input stream, indicating
+ * that receive should be used by the driver to produce the next state, and
+ * that fallback should be consulted if the input has no more elements available.
  */
 public class Await<I, O> extends Process<I, O> {
 
