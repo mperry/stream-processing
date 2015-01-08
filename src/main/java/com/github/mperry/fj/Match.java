@@ -20,11 +20,15 @@ public class Match<A, B> {
         other = o;
     }
 
-    public static <A, B> Match<A, B> match(List<When<A, B>> cases, F<A, B> other) {
+    public static <A, B> Match<A, B> createMatch(List<When<A, B>> cases, F<A, B> other) {
         return new Match<A, B>(cases, other);
     }
 
-    public Option<B> applyWithoutDefault(A a) {
+    public static <A, B> B match(A a, F<A, B> fallback, List<When<A, B>> cases) {
+        return createMatch(cases, fallback).match(a);
+    }
+
+    public Option<B> matchWithoutDefault(A a) {
         return cases.foldLeft((acc, w) -> {
             if (acc.isSome()) {
                 return acc;
@@ -34,21 +38,21 @@ public class Match<A, B> {
         }, Option.<B>none());
     }
 
-    public B apply(A a) {
-        Option<B> o = applyWithoutDefault(a);
+    public B match(A a) {
+        Option<B> o = matchWithoutDefault(a);
         return o.orSome(P.lazy(u -> other.f(a)));
     }
 
-    public B apply(A a, F<A, B> defaultValue) {
-        return applyWithoutDefault(a).orSome(defaultValue.f(a));
+    public B match(A a, F<A, B> defaultValue) {
+        return matchWithoutDefault(a).orSome(defaultValue.f(a));
     }
 
     public Match<A, B> when(When<A, B> w) {
-        return match(cases.snoc(w), other);
+        return createMatch(cases.snoc(w), other);
     }
 
     public <C> Match<A, C> map(F<B, C> f) {
-        return match(cases.map((w) -> w.map(f)), andThen(other, f));
+        return createMatch(cases.map((w) -> w.map(f)), andThen(other, f));
     }
 
     public <C> Match<A, C> flatMap(F<B, Match<A, C>> f) {
@@ -58,12 +62,12 @@ public class Match<A, B> {
 //        C c = f.f(other).other;
         F<A, C> h = a -> andThen(other, f).f(a).other.f(a);
 //        andThen(other, f.f())
-        return match(cases.map(w -> When.when(w.guard, a -> f.f(w.transform.f(a)).apply(a, h))), h);
+        return createMatch(cases.map(w -> When.when(w.guard, a -> f.f(w.transform.f(a)).match(a, h))), h);
 
     }
 
     public Match<A, B> append(Match<A, B> m) {
-        return match(cases.append(m.cases), other);
+        return createMatch(cases.append(m.cases), other);
     }
 
 }

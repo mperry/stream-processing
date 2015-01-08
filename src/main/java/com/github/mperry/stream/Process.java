@@ -47,7 +47,7 @@ public class Process<I, O> {
             })
         );
         // default is halt case, repeated from above
-        return Match.match(l, p -> Stream.<O>nil()).apply(this);
+        return Match.createMatch(l, p -> Stream.<O>nil()).match(this);
     }
 
     /**
@@ -86,8 +86,8 @@ public class Process<I, O> {
             })
         );
         // default is halt case, repeated from above
-        Match<Process<I, O>, Process<I, O>> m = Match.match(list1, p2 -> repeat(original, original));
-        return m.apply(p);
+        Match<Process<I, O>, Process<I, O>> m = Match.createMatch(list1, p2 -> repeat(original, original));
+        return m.match(p);
     }
 
     /**
@@ -228,10 +228,10 @@ public class Process<I, O> {
                         })
                     );
                     // halt case
-                    return Match.match(l2, h -> Halt.<I, O>halt().pipe(a.receive.f(Option.none()))).apply(this);
+                    return Match.createMatch(l2, h -> Halt.<I, O>halt().pipe(a.receive.f(Option.none()))).match(this);
                 })
         );
-        return Match.match(l1, h -> Halt.halt()).apply(p2);
+        return Match.createMatch(l1, h -> Halt.halt()).match(p2);
     }
 
     /**
@@ -245,12 +245,12 @@ public class Process<I, O> {
      * section 15.2.2
      */
     public Process<I, O> append(Process<I, O> p) {
-        return Match.match(List.<When<Process<I, O>, Process<I, O>>>list(
-            // halt case below
-            whenClass(Emit.class, (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))),
-            whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
+        return Match.createMatch(List.<When<Process<I, O>, Process<I, O>>>list(
+                // halt case below
+                whenClass(Emit.class, (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))),
+                whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
 
-        ), h -> halt()).apply(this);
+        ), h -> halt()).match(this);
 //        return null;
     }
 
@@ -258,10 +258,10 @@ public class Process<I, O> {
      * section 15.2.2
      */
     public <O2> Process<I, O2> flatMap(F<O, Process<I, O2>> f) {
-        return Match.match(List.<When<Process<I, O>, Process<I, O2>>>list(
-            whenClass(Emit.class, (Emit<I, O> e) -> f.f(e.head).append(e.tail.flatMap(f))),
-            whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, x -> x.flatMap(f))))
-        ), h -> halt()).apply(this);
+        return Match.createMatch(List.<When<Process<I, O>, Process<I, O2>>>list(
+                whenClass(Emit.class, (Emit<I, O> e) -> f.f(e.head).append(e.tail.flatMap(f))),
+                whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, x -> x.flatMap(f))))
+        ), h -> halt()).match(this);
     }
 
     /**
@@ -296,14 +296,14 @@ public class Process<I, O> {
     }
 
     public static <A, B> B helper(Iterator<String> ss, Process<String, A> curr, B acc, F2<B, A, B> g) {
-        return Match.match(List.list(
+        return Match.createMatch(List.list(
                 whenClass(Halt.class, h -> acc),
                 whenClass(Await.class, (Await<String, A> a) -> {
                     Process<String, A> next = ss.hasNext() ? a.receive.f(some(ss.next())) : a.receive.f(none());
                     return helper(ss, next, acc, g);
                 }),
                 whenClass(Emit.class, (Emit<String, A> e) -> helper(ss, e.tail, g.f(acc, e.head), g))
-        ), h -> acc).apply(curr);
+        ), h -> acc).match(curr);
 //        return null;
     }
 

@@ -5,7 +5,6 @@ import fj.data.Stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
@@ -32,13 +31,13 @@ public class MatchDemo {
     private static void fizzbuzz() {
         int fizz = 3;
         int buzz = 5;
-        Match<Integer, String> m = Match.match(fj.data.List.<When<Integer, String>>list(
+        Match<Integer, String> m = Match.createMatch(fj.data.List.<When<Integer, String>>list(
                 when(i -> divBy(i, fizz) && divBy(i, buzz), i -> "fizzbuzz"),
                 when(divBy(fizz), i -> "fizz"),
                 when(divBy(buzz), i -> "buzz")
         ), i -> i.toString());
         Stream<Integer> s1 = Stream.range(1);
-        Stream<String> s2 = s1.map(i -> m.apply(i));
+        Stream<String> s2 = s1.map(i -> m.match(i));
         System.out.println(s1.zip(s2).take(20).toList());
     }
 
@@ -61,14 +60,14 @@ public class MatchDemo {
                 When.whenClass(ArrayList.class, (l) -> "ArrayList")
         );
 
-        Match<java.util.List<Integer>, String> m = Match.<java.util.List<Integer>, String>match(fj.data.List.list(
+        Match<java.util.List<Integer>, String> m = Match.<java.util.List<Integer>, String>createMatch(fj.data.List.list(
                 whenClass(ArrayList.class, l -> "ArrayList"),
                 whenClass(java.util.List.class, l -> "list")
 //                when(Map.class, (java.util.List<Integer> l) -> "map")
 //                When.<List<Integer>, String, ArrayList>when(ArrayList.class, (List<Integer> l) -> "ArrayList")
         ), l -> "default");
         java.util.List<Integer> list = Arrays.asList(1, 2);
-        System.out.println(m.apply(list));
+        System.out.println(m.match(list));
         System.out.println(list.getClass());
     }
 
