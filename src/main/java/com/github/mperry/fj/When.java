@@ -36,7 +36,9 @@ public class When<A, B> {
         return append(whenClass(clazz, t));
     }
 
-    public static <A extends C, B extends A, C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<B, D> f) {
+//    public static <C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<? extends C, D> f) {
+        public static <B extends C, C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<B, D> f) {
+//    public static <A extends C, B extends A, C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<B, D> f) {
         return when((C c) -> clazz.isInstance(c), (C c) -> {
             B b = (B) c;
             return f.f(b);

@@ -264,7 +264,8 @@ public class Process<I, O> {
 //        Match.match(this, h -> halt(), w);
 
         return Match.match(this, h -> halt(),
-            When.<Emit, Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
+            When.<Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
+//            When.whenClass(Emit.class,
                 (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))
             ).appendClass(Await.class,
                 (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p)))
