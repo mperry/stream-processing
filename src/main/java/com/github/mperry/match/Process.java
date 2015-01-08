@@ -9,6 +9,7 @@ import fj.data.Stream;
 
 import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
+import static com.github.mperry.match.Await.awaiti;
 import static com.github.mperry.match.Halt.halt;
 import static fj.data.Option.none;
 import static fj.data.Option.some;
@@ -163,6 +164,47 @@ public class Process<I, O> {
     public static <I> Process<I, I> dropWhile() {
         // TODO
         throw Bottom.error("Process.dropWhile not yet implemented");
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.2
+     */
+    public static <I> Process<I, Integer> count() {
+        // TODO
+        throw Bottom.error("Process.count not yet implemented");
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.3
+     */
+    public static Process<Double, Double> mean() {
+        // TODO
+        throw Bottom.error("Process.mean not yet implemented");
+    }
+
+    /**
+     * Section 15.2.1, helps with exercise 15.4
+     */
+    public static <S, I, O> Process<I, O> loop(S acc, F2<I, S, P2<O, S>> f) {
+        return awaiti((I i) -> {
+            P2<O, S> p = f.f(i, acc);
+            return Emit.<I, O>emit(p._1(), loop(p._2(), f));
+//            return null;
+        });
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.4
+     */
+    public static <I> Process<I, Integer> count2() {
+        return loop(0, (i, s) -> P.p(s + 1, s + 1));
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.4
+     */
+    public static <I> Process<Double, Double> sum2() {
+        return loop(0.0, (i, s) -> P.p(s + i, s + i));
     }
 
 
