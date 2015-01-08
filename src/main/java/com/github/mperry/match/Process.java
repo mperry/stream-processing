@@ -207,5 +207,28 @@ public class Process<I, O> {
         return loop(0.0, (i, s) -> P.p(s + i, s + i));
     }
 
+    /**
+     * Section 15.2.2, Exercise 15.5
+     */
+    public <O2> Process<I, O2> pipe(Process<O, O2> p2) {
+        List<When<Process<O, O2>, Process<I, O2>>> l1 = List.<When<Process<O, O2>, Process<I, O2>>>list(
+                // use halt as the default case in the outer match
+                // whenClass(Halt.class, (Halt<O, O2> h) -> Halt.<I, O2>halt()),
+                whenClass(Emit.class, (Emit<O, O2> e) -> Emit.emit(e.head, this.pipe(e.tail))),
+                whenClass(Await.class, (Await<O, O2> a) -> {
+                    List<When<Process<I, O>, Process<I, O2>>> l2 = List.list(
+                        // use Halt case as the default inner match below
+                        whenClass(Emit.class, (Emit<I, O> e) -> e.tail.pipe(a.receive.f(Option.some(e.head)))),
+                        whenClass(Await.class, (Await<I, O> a2) -> {
+                            return Await.await((Option<I> o) -> a2.receive.f(o).pipe(p2));
+                        })
+                    );
+                    // halt case
+                    return Match.match(l2, h -> Halt.<I, O>halt().pipe(a.receive.f(Option.none()))).apply(this);
+                })
+        );
+        return Match.match(l1, h -> Halt.halt()).apply(p2);
+    }
+
 
 }
