@@ -2,10 +2,7 @@ package com.github.mperry.match;
 
 import com.github.mperry.fj.Match;
 import com.github.mperry.fj.When;
-import fj.F;
-import fj.F1Functions;
-import fj.Function;
-import fj.P;
+import fj.*;
 import fj.data.List;
 import fj.data.Option;
 import fj.data.Stream;
@@ -150,6 +147,22 @@ public class Process<I, O> {
     public static <I> Process<I, I> identity() {
         return lift(Function.<I>identity());
 
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.1
+     */
+    public static <I> Process<I, I> takeWhile() {
+        // TODO
+        throw Bottom.error("Process.takeWhile not yet implemented");
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.1
+     */
+    public static <I> Process<I, I> dropWhile() {
+        // TODO
+        throw Bottom.error("Process.dropWhile not yet implemented");
     }
 
 
