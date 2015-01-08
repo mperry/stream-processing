@@ -1,4 +1,4 @@
-package com.github.mperry.match;
+package com.github.mperry.stream;
 
 /**
  * Created by MarkPerry on 7/01/2015.

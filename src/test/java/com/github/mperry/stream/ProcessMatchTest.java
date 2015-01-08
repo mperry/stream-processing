@@ -1,4 +1,4 @@
-package com.github.mperry.match;
+package com.github.mperry.stream;
 
 import fj.Unit;
 import fj.data.IO;

@@ -1,7 +1,6 @@
-package com.github.mperry.match;
+package com.github.mperry.stream;
 
 import com.github.mperry.fj.Match;
-import com.github.mperry.fj.Util;
 import com.github.mperry.fj.When;
 import fj.*;
 import fj.data.*;
@@ -10,14 +9,11 @@ import fj.data.Stream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.stream.*;
 
-import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
-import static com.github.mperry.match.Await.awaiti;
-import static com.github.mperry.match.Halt.halt;
+import static com.github.mperry.stream.Await.awaiti;
+import static com.github.mperry.stream.Halt.halt;
 import static fj.F1Functions.andThen;
 import static fj.data.Option.none;
 import static fj.data.Option.some;
