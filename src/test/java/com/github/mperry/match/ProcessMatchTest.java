@@ -64,6 +64,7 @@ public class ProcessMatchTest {
         Process<Integer, Integer> p = Process.filter((Integer i) -> i % 2 == 0).pipe(Process.lift((Integer i) -> i + 1));
         List<Integer> l = p.apply(Stream.range(1, 10)).toList();
         out.println(l);
+        assertTrue(l.equals(list(3, 5, 7, 9)));
     }
 
 }
