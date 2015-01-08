@@ -75,22 +75,38 @@ public class ProcessMatchTest {
     }
 
     @Test
-    public void processFile() {
-        String base = "abc.txt";
-        String filename = "test/resources/" + base;
-//        java.net.URL url = getClass().getResource(filename);
+    public void processFileWithCount() {
         try {
-//            Path path1 = java.nio.file.Paths.get(url.toURI());
-            Path path2 = Paths.get(getClass().getResource("/" + base).toURI());
-            File f = path2.toFile();
+            Process<String, Boolean> p = Process.<String>count2().pipe(Process.exists((Integer i) -> i == 3));
+            IO<Boolean> io = Process.processFile(basicFile(), p, false, (a, b) -> a || b);
+            Boolean result = io.run();
+            System.out.println(result);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
+    String RESOURCE_DIR = "test/resources";
+    String BASE_FILE = "abc.txt";
 
+    File testFile(String filename) throws URISyntaxException {
+        Path p = Paths.get(getClass().getResource("/" + filename).toURI());
+        return p.toFile();
+    }
 
-            Process<String, Boolean> p = Process.<String>count2().pipe(Process.exists((Integer i) -> i > 2));
-            IO<Boolean> io = Process.processFile(f, p, false, (a, b) -> a || b);
-            Boolean b = io.run();
-            System.out.println(b);
+    File basicFile() throws URISyntaxException {
+        return testFile(BASE_FILE);
+    }
 
+    @Test
+    public void processFileWithAppend() {
+        try {
+            Process<String, String> p = Process.<String>identity();
+            IO<String> io = Process.processFile(basicFile(), p, "", (a, b) -> a + "***" + b);
+            String r = io.run();
+            System.out.println(r);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -99,5 +115,6 @@ public class ProcessMatchTest {
 
 
     }
+
 
 }

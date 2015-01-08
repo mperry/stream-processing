@@ -294,14 +294,13 @@ public class Process<I, O> {
                 return helper(s1.iterator(), p, acc, g);
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
                 return acc;
             }
         });
     }
 
     public static <A, B> B helper(Iterator<String> ss, Process<String, A> curr, B acc, F2<B, A, B> g) {
-        Match.match(List.list(
+        return Match.match(List.list(
                 whenClass(Halt.class, h -> acc),
                 whenClass(Await.class, (Await<String, A> a) -> {
                     Process<String, A> next = ss.hasNext() ? a.receive.f(some(ss.next())) : a.receive.f(none());
@@ -309,7 +308,7 @@ public class Process<I, O> {
                 }),
                 whenClass(Emit.class, (Emit<String, A> e) -> helper(ss, e.tail, g.f(acc, e.head), g))
         ), h -> acc).apply(curr);
-        return null;
+//        return null;
     }
 
 
