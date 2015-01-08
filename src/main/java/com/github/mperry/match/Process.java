@@ -3,6 +3,8 @@ package com.github.mperry.match;
 import com.github.mperry.fj.Match;
 import com.github.mperry.fj.When;
 import fj.F;
+import fj.F1Functions;
+import fj.Function;
 import fj.P;
 import fj.data.List;
 import fj.data.Option;
@@ -10,6 +12,7 @@ import fj.data.Stream;
 
 import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
+import static com.github.mperry.match.Halt.halt;
 import static fj.data.Option.none;
 import static fj.data.Option.some;
 
@@ -50,9 +53,13 @@ public class Process<I, O> {
      * Section 15.2.1
      */
     public static <I, O> Process<I, O> liftOne(F<I, O> f) {
-        return Await.await(o -> o.isSome() ? Emit.emit(f.f(o.some())) : Halt.halt());
+        return Await.await(o -> o.isSome() ? Emit.emit(f.f(o.some())) : halt());
     }
 
+    /**
+     * Section 15.2.1
+     * Transform a whole stream
+     */
     public Process<I, O> repeat() {
         return Process.<I, O>repeat(this, this);
     }
@@ -81,26 +88,49 @@ public class Process<I, O> {
         return m.apply(p);
     }
 
+    /**
+     * Section 15.2.1
+     */
     public static <I, O> Process<I, O> lift(F<I, O> f) {
         return liftOne(f).repeat();
     }
 
+    /**
+     * Section 15.2.1
+     */
     public static <I> Process<I, I> filter(F<I, Boolean> f) {
         return Await.<I, I>await(o -> {
             if (o.isNone()) {
-                return Halt.halt();
+                return halt();
             } else {
                 I i = o.some();
-                return f.f(i) ? Emit.emit(i) : Halt.halt();
+                return f.f(i) ? Emit.emit(i) : halt();
             }
 
         }).repeat();
     }
 
+    /**
+     * Section 15.2.1, Exercise 15.1
+     */
+    public static <I> Process<I, I> take(int n) {
+        return n <= 0 ? halt() : Await.<I, I>awaiti(i -> Emit.<I, I>emit(i, take(n - 1)));
+    }
+
+    /**
+     * Section 15.2.1, Exercise 15.1
+     */
+    public static <I> Process<I, I> drop(int n) {
+        return n <= 0 ? identity() : Await.<I, I>awaiti(i -> drop(n - 1));
+    }
+
+    /**
+     * Section 15.2.1
+     */
     public static Process<Double, Double> sum(double acc) {
         return Await.await((Option<Double> o) -> {
             if (o.isNone()) {
-                return Halt.halt();
+                return halt();
             } else {
                 double d = o.some();
                 return Emit.emit(d + acc, sum(d + acc));
@@ -109,9 +139,18 @@ public class Process<I, O> {
         });
     }
 
+    /**
+     * Section 15.2.1
+     */
     public static Process<Double, Double> sum() {
         return sum(0.0);
 
     }
+
+    public static <I> Process<I, I> identity() {
+        return lift(Function.<I>identity());
+
+    }
+
 
 }

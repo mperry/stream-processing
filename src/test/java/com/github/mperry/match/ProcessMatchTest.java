@@ -42,7 +42,21 @@ public class ProcessMatchTest {
     public void sum() {
         List<Double> l = Process.sum().apply(Stream.range(1, 5).map(i -> (double) i)).toList();
         out.println(l);
-        assertTrue(l.equals(List.list(1.0, 3.0, 6.0, 10.0)));
+        assertTrue(l.equals(list(1.0, 3.0, 6.0, 10.0)));
+    }
+
+    @Test
+    public void take() {
+        List<Integer> l = Process.<Integer>take(2).apply(Stream.range(1)).toList();
+        out.println(l);
+        assertTrue(l.equals(list(1, 2)));
+    }
+
+    @Test
+    public void drop() {
+        List<Integer> l = Process.<Integer>drop(2).apply(Stream.range(1, 5)).toList();
+        out.println(l);
+        assertTrue(l.equals(list(3, 4)));
     }
 
 }

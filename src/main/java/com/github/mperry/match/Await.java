@@ -18,4 +18,13 @@ public class Await<I, O> extends Process<I, O> {
         return new Await<I, O>(receive);
     }
 
+    public static <I, O> Await<I, O> await(F<I, Process<I, O>> f, Process<I, O> fallback) {
+        return await(o -> o.isNone() ? fallback : f.f(o.some()));
+    }
+
+    public static <I, O> Await<I, O> awaiti(F<I, Process<I, O>> f) {
+        return await(f, Halt.halt());
+    }
+
+
 }
