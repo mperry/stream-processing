@@ -73,13 +73,11 @@ public class Process<I, O> {
             // restart the original process if it wants to halt, let the stream halt it itself
             whenClass(Halt.class, (Halt<I, O> h) -> repeat(original, original)),
             whenClass(Await.class, (Await<I, O> a) -> {
-//                Await<I, O> a = z;
                 return Await.await((Option<I> o) ->
                                 o.isNone() ? a.receive.f(o) : repeat(original, a.receive.f(o))
                 );
             }),
             whenClass(Emit.class, (Emit<I, O> e) -> {
-//                Emit<I, O> e = z;
                 return Emit.emit(e.head, repeat(original, e.tail));
             })
         );
@@ -135,7 +133,6 @@ public class Process<I, O> {
                 double d = o.some();
                 return Emit.emit(d + acc, sum(d + acc));
             }
-//            return o.map(d -> Emit.emit(d + acc, sum(d + acc))).orSome(Halt.<Double, Double>halt());
         });
     }
 
@@ -191,7 +188,6 @@ public class Process<I, O> {
         return awaiti((I i) -> {
             P2<O, S> p = f.f(i, acc);
             return Emit.<I, O>emit(p._1(), loop(p._2(), f));
-//            return null;
         });
     }
 
@@ -249,35 +245,16 @@ public class Process<I, O> {
                 whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
 
         ), h -> halt()).match(this);
-//        return null;
     }
 
     public Process<I, O> append2(Process<I, O> p) {
-
-//        When<Process<I, O>, Process<I, O>> w = When.<Emit, Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
-//                (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))
-//        ).appendClass(Await.class,
-//                (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p)))
-//        );
-//
-//        Match.match(this, h -> halt(), w);
-
         return Match.match(this, h -> halt(),
             When.<Emit<I, O>, Process<I, O>, Process<I, O>>whenClass(Emit.class,
-//            When.whenClass(Emit.class,
                 (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))
             ).appendClass(Await.class,
                 (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p)))
             )
         );
-
-//        return Match.createMatch(List.<When<Process<I, O>, Process<I, O>>>list(
-//                // halt case below
-//                whenClass(Emit.class, (Emit<I, O> e) -> Emit.emit(e.head, e.tail.append(p))),
-//                whenClass(Await.class, (Await<I, O> a) -> Await.await(andThen(a.receive, p2 -> p2.append(p))))
-//
-//        ), h -> halt()).match(this);
-
     }
 
     /**
@@ -330,7 +307,6 @@ public class Process<I, O> {
                 }),
                 whenClass(Emit.class, (Emit<String, A> e) -> process(it, e.tail, f.f(acc, e.head), f))
         ), h -> acc).match(p);
-//        return null;
     }
 
 
