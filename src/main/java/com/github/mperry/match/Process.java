@@ -97,4 +97,21 @@ public class Process<I, O> {
         }).repeat();
     }
 
+    public static Process<Double, Double> sum(double acc) {
+        return Await.await((Option<Double> o) -> {
+            if (o.isNone()) {
+                return Halt.halt();
+            } else {
+                double d = o.some();
+                return Emit.emit(d + acc, sum(d + acc));
+            }
+//            return o.map(d -> Emit.emit(d + acc, sum(d + acc))).orSome(Halt.<Double, Double>halt());
+        });
+    }
+
+    public static Process<Double, Double> sum() {
+        return sum(0.0);
+
+    }
+
 }
