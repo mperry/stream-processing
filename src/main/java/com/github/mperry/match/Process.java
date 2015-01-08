@@ -85,4 +85,16 @@ public class Process<I, O> {
         return liftOne(f).repeat();
     }
 
+    public static <I> Process<I, I> filter(F<I, Boolean> f) {
+        return Await.<I, I>await(o -> {
+            if (o.isNone()) {
+                return Halt.halt();
+            } else {
+                I i = o.some();
+                return f.f(i) ? Emit.emit(i) : Halt.halt();
+            }
+
+        }).repeat();
+    }
+
 }

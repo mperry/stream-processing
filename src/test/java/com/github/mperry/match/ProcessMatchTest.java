@@ -5,6 +5,8 @@ import fj.data.List;
 import fj.data.Stream;
 import org.junit.Test;
 
+import static fj.data.List.list;
+import static java.lang.System.out;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -15,8 +17,8 @@ public class ProcessMatchTest {
     @Test
     public void liftOne() {
         Stream<Integer> s = Process.liftOne((Integer i) -> i * 2).apply(Stream.range(1));
-        System.out.println(s.toList());
-        assertTrue(s.toList().equals(List.list(2)));
+        out.println(s.toList());
+        assertTrue(s.toList().equals(list(2)));
     }
 
     @Test
@@ -24,8 +26,16 @@ public class ProcessMatchTest {
         Stream<Unit> s1 = Stream.repeat(Unit.unit());
         Process<Unit, Integer> p = Process.lift((Unit u) -> 1);
         Stream<Integer> s2 = p.apply(s1);
-        System.out.println(s2.take(10).toList());
-        assertTrue(s2.take(2).toList().equals(List.list(1, 1)));
+        out.println(s2.take(10).toList());
+        assertTrue(s2.take(2).toList().equals(list(1, 1)));
+    }
+
+    @Test
+    public void filter() {
+        List<Integer> l = Process.filter((Integer i) -> i % 2 == 0).apply(Stream.range(1, 5)).toList();
+        out.println(l);
+        assertTrue(l.equals(list(2, 4)));
+
     }
 
 }
