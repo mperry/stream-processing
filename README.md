@@ -1,5 +1,6 @@
-stream-processing
+Stream Processing
 =================
 
-exercise 1?
+This is an attempt to port stream processors (transducers) from the book "Functional Programming in Scala" chapter 15 from Scala to Java.
+
 
