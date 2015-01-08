@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Iterator;
 
-import static com.github.mperry.fj.When.when;
 import static com.github.mperry.fj.When.whenClass;
 import static com.github.mperry.stream.Await.awaiti;
 import static com.github.mperry.stream.Halt.halt;
@@ -314,7 +313,7 @@ public class Process<I, O> {
     public static <A, B> IO<B> processFile(File f, Process<String, A> p, B acc, F2<B, A, B> g) {
         return IOFunctions.lazy(u -> {
             try (java.util.stream.Stream<String> s1 = Files.lines(f.toPath())) {
-                return helper(s1.iterator(), p, acc, g);
+                return process(s1.iterator(), p, acc, g);
             } catch (IOException e) {
                 e.printStackTrace();
                 return acc;
@@ -322,15 +321,15 @@ public class Process<I, O> {
         });
     }
 
-    public static <A, B> B helper(Iterator<String> ss, Process<String, A> curr, B acc, F2<B, A, B> g) {
+    public static <A, B> B process(Iterator<String> it, Process<String, A> p, B acc, F2<B, A, B> f) {
         return Match.createMatch(List.list(
                 whenClass(Halt.class, h -> acc),
                 whenClass(Await.class, (Await<String, A> a) -> {
-                    Process<String, A> next = ss.hasNext() ? a.receive.f(some(ss.next())) : a.receive.f(none());
-                    return helper(ss, next, acc, g);
+                    Process<String, A> next = it.hasNext() ? a.receive.f(some(it.next())) : a.receive.f(none());
+                    return process(it, next, acc, f);
                 }),
-                whenClass(Emit.class, (Emit<String, A> e) -> helper(ss, e.tail, g.f(acc, e.head), g))
-        ), h -> acc).match(curr);
+                whenClass(Emit.class, (Emit<String, A> e) -> process(it, e.tail, f.f(acc, e.head), f))
+        ), h -> acc).match(p);
 //        return null;
     }
 
