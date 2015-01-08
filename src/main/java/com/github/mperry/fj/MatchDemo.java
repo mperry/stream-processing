@@ -1,5 +1,8 @@
 package com.github.mperry.fj;
 
+import fj.F;
+import fj.data.Stream;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,21 +17,48 @@ import static fj.data.List.list;
 public class MatchDemo {
 
     public static void main(String [] args) {
+        fizzbuzz();
         option();
     }
 
+    private static boolean divBy(int n, int divideBy) {
+        return n % divideBy == 0;
+    }
 
+    private static F<Integer, Boolean> divBy(int divideBy) {
+        return i -> divBy(i, divideBy);
+    }
+
+    private static void fizzbuzz() {
+        int fizz = 3;
+        int buzz = 5;
+        Match<Integer, String> m = Match.match(fj.data.List.<When<Integer, String>>list(
+                when(i -> divBy(i, fizz) && divBy(i, buzz), i -> "fizzbuzz"),
+                when(divBy(fizz), i -> "fizz"),
+                when(divBy(buzz), i -> "buzz")
+        ), i -> i.toString());
+        Stream<Integer> s1 = Stream.range(1);
+        Stream<String> s2 = s1.map(i -> m.apply(i));
+        System.out.println(s1.zip(s2).take(20).toList());
+    }
+
+    /**
+     * This is a prototype to play around with the generic types for When.whenClass, Java warnings and Intellij warnings
+     */
     private static void option() {
         fj.data.List<When<? extends java.util.List<Integer>, String>> list1 = list(
-                When.<ArrayList, java.util.List<Integer>, String>whenClass(ArrayList.class, (l) -> "ArrayList"),
-                When.<java.util.List, java.util.List<Integer>, String>whenClass(java.util.List.class, l -> "list")
+//                When.<ArrayList<Integer>, java.util.List<Integer>, String>whenClass(ArrayList.class, (l) -> "ArrayList"),
+                When.whenClass(ArrayList.class, (l) -> "ArrayList"),
+//                When.<java.util.List, java.util.List<Integer>, String>whenClass(java.util.List.class, l -> "list")
+                When.whenClass(java.util.List.class, l -> "list")
         );
 
-        fj.data.List<When<java.util.List<Integer>, String>> list2 = list(
-            When.<ArrayList, java.util.List<Integer>, String>whenClass(ArrayList.class, (l) -> "ArrayList"),
-            When.whenClass(ArrayList.class, (l) -> "ArrayList"),
+        fj.data.List<When<java.util.List<Integer>, String>> list2 = fj.data.List.list(
+//            When.<ArrayList, java.util.List<Integer>, String>whenClass(ArrayList.class, (l) -> "ArrayList"),
+                When.whenClass(ArrayList.class, (l) -> "ArrayList"),
+                When.whenClass(ArrayList.class, (l) -> "ArrayList"),
 //            When.<java.util.List, java.util.List<Integer>, String>whenClass(java.util.List.class, l -> "list"),
-            When.whenClass(ArrayList.class, (l) -> "ArrayList")
+                When.whenClass(ArrayList.class, (l) -> "ArrayList")
         );
 
         Match<java.util.List<Integer>, String> m = Match.<java.util.List<Integer>, String>match(fj.data.List.list(

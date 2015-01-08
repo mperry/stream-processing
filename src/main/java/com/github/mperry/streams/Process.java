@@ -6,6 +6,8 @@ import fj.data.Stream;
 
 /**
  * Created by MarkPerry on 27/04/2014.
+ *
+ * This implementation is based on inheritance and overriding methods in subclasses
  */
 public abstract class Process<I, O> {
 

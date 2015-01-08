@@ -24,10 +24,10 @@ public class When<A, B> {
         return new When<A, B>(g, t);
     }
 
-    public static <C extends A, A, B> When<A, B> whenClass(final java.lang.Class<C> clazz, F<C, B> f) {
-        return when((A a) -> clazz.isInstance(a), (A a) -> {
-            C c = (C) a;
-            return f.f(c);
+    public static <A extends C, B extends A, C, D> When<C, D> whenClass(final java.lang.Class<?> clazz, F<B, D> f) {
+        return when((C c) -> clazz.isInstance(c), (C c) -> {
+            B b = (B) c;
+            return f.f(b);
         });
     }
 
