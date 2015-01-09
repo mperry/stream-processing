@@ -7,12 +7,12 @@ package com.github.mperry.stream;
  * the input stream or emitted to the output.
  *
  */
-public class Halt<I, O> extends Process<I, O> {
+public class Halt1<I, O> extends Process1<I, O> {
 
-    private Halt() {}
+    private Halt1() {}
 
-    public static <I, O> Halt<I, O> halt() {
-        return new Halt<I, O>();
+    public static <I, O> Halt1<I, O> halt() {
+        return new Halt1<I, O>();
     }
 
 }
