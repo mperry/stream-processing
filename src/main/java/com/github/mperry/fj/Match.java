@@ -1,5 +1,6 @@
 package com.github.mperry.fj;
 
+import fj.Bottom;
 import fj.F;
 import fj.P;
 import fj.data.List;
@@ -32,6 +33,12 @@ public class Match<A, B> {
         return match(a, fallback, List.list(w));
     }
 
+    public static <A, B> B unsafeMatch(A a, When<A, B> w) {
+        return match(a, a2 -> {
+            Bottom.error("unsafeMatch did not match");
+            return w.transform.f(a2);
+        }, List.list(w));
+    }
 
     public Option<B> matchWithoutDefault(A a) {
         return cases.foldLeft((acc, w) -> {

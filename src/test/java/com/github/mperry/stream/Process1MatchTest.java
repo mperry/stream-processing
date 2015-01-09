@@ -97,7 +97,9 @@ public class Process1MatchTest {
     }
 
     File basicFile() throws URISyntaxException {
-        return testFile(BASE_FILE);
+//        return TestUtil.testFile(BASE_FILE, getClass());
+        return TestUtil.testFile(BASE_FILE);
+//        return testFile(BASE_FILE);
     }
 
     @Test
