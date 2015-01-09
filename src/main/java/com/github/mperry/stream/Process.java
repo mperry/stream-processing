@@ -298,6 +298,11 @@ public class Process<I, O> {
         });
     }
 
+    /**
+     * Helper function for processFile, named go in section 15.2.3
+     *
+     * TODO: This is tail recursive and will overflow the stack.  This should be fixed, probably using a trampoline.
+     */
     public static <A, B> B process(Iterator<String> it, Process<String, A> p, B acc, F2<B, A, B> f) {
         return Match.createMatch(List.list(
                 whenClass(Halt.class, h -> acc),
