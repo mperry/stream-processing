@@ -26,6 +26,11 @@ public class ProcessIOTest {
     }
 
 
+    /**
+     *
+     * do something
+     * section 15.3.1, listing 15.6
+     */
     @Test
     public void test2() {
 
@@ -73,6 +78,11 @@ public class ProcessIOTest {
     }
 
 
+    /**
+     * Section 15.3.1, listing 15.6
+     * @param br
+     * @return
+     */
     final P1<ProcessIO<String, String>> next(BufferedReader br) {
         return P.lazy(u -> AwaitIO.await(IOFunctions.<String>io(() -> br.readLine()), (Validation<Throwable, String> v2) -> {
             if (v2.isFail()) {
