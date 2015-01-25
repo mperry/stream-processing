@@ -116,6 +116,74 @@ public class ProcessIO<I, O> {
 
 
 
+    public ProcessIO<I, O> onComplete(ProcessIO<I, O> p) {
+        return onHalt(t -> {
+            if (End.class.isInstance(t)) {
+                return p.asFinaliser();
+            } else {
+                return p.asFinaliser().append(P.lazy(u -> HaltIO.halt(t)));
+            }
+
+        });
+    }
+
+    public ProcessIO<I, O> asFinaliser() {
+
+        return Match.unsafeMatch(this,
+                When.<EmitIO<I, O>, ProcessIO<I, O>, ProcessIO<I, O>>whenClass(
+                        EmitIO.class, (EmitIO<I, O> e) -> EmitIO.emit(e.head, e.tail.asFinaliser())
+                ).appendClass(
+                        HaltIO.class, (HaltIO<I, O> h) -> HaltIO.halt(h.error)
+                ).appendClass(
+                        AwaitIO.class, (AwaitIO<I, I, O> a) -> {
+                            return a.await(a.request, v -> {
+                                if (v.isFail()) {
+                                    return asFinaliser();
+                                } else {
+                                    return a.receive.f(v);
+                                }
+                            });
+                        }
+                )
+        );
+    }
+
+    public static <R, I, O>  ProcessIO<I, O> resource(
+            IO<R> acquire, F<R, ProcessIO<I, O>> use, F<R, ProcessIO<I, O>> release) {
+        return ProcessIO.<I, R>eval(acquire).flatMap(r -> use.f(r).onComplete(release.f(r)));
+    }
+
+    public static <I, O> ProcessIO<I, O> eval(IO<O> io) {
+        return AwaitIO.await(io, v -> {
+            if (v.isFail()) {
+                return HaltIO.halt(v.fail());
+            } else {
+                return EmitIO.emit(v.success(), HaltIO.halt(End.end()));
+            }
+        });
+    }
+
+    public static <I, O, O2> ProcessIO<I, O2> eval_(IO<O> io) {
+        return ProcessIO.<I, O>eval(io).drain();
+    }
+
+    public <O2> ProcessIO<I, O2> drain() {
+        return Match.unsafeMatch(this,
+                When.<HaltIO<I, O>, ProcessIO<I, O>, ProcessIO<I, O2>>whenClass(
+                        HaltIO.class, (HaltIO<I, O> h) -> HaltIO.halt(h.error)
+                ).appendClass(
+                        EmitIO.class, (EmitIO<I, O> e) -> {
+//                            return null;
+                            return e.tail.<O2>drain();
+                        }
+                ).appendClass(
+                        AwaitIO.class, (AwaitIO<I, I, O> a) ->
+                                AwaitIO.await(a.request, F1Functions.andThen(a.receive, p -> p.drain()))
+//                        F1Functions.<Validation<Throwable, I>, ProcessIO<I, O>, ProcessIO<I, O2>>andThen(a.receive, p -> p.drain()))
+                )
+        );
+    }
+
 //    public ProcessIO<I, O> error(String msg) {
 //        Bottom.error(msg);
 //        return this;

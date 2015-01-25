@@ -1,14 +1,13 @@
 package com.github.mperry.stream;
 
-import fj.P;
-import fj.P1;
-import fj.Unit;
+import fj.*;
 import fj.data.*;
 import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Iterator;
 
 import static com.github.mperry.stream.AwaitIO.await;
 import static com.github.mperry.stream.HaltIO.halt;
@@ -104,5 +103,69 @@ public class ProcessIOTest {
 //                    return null;
         }));
     }
+
+
+    static <I> ProcessIO<I, String> lines(IO<Option<String>> io) {
+        return ProcessIO.<I, Option<String>>eval(io).flatMap(os -> {
+            if (os.isNone()) {
+                return HaltIO.halt(End.end());
+            } else {
+                return EmitIO.<I, String>emit(os.some(), lines(io));
+            }
+        });
+
+    }
+
+    /**
+     * Section 15.3.2, method lines
+     */
+    @Test
+    public void resourceSafe() {
+
+        IO<BufferedReader> io = io(() -> {
+            return new BufferedReader(new FileReader(TestUtil.testFile("abc.txt")));
+        });
+        F<BufferedReader, ProcessIO<String, String>> use = src -> {
+            Stream<String> s = lines(src);
+            Iterator<String> it = s.iterator();
+            P1<Option<String>> f = P.lazy(u -> it.hasNext() ? Option.some(it.next()) : Option.none());
+            return lines(IOFunctions.io(f));
+        };
+        ProcessIO<String, String> p = ProcessIO.resource(io, use,
+                (BufferedReader src) -> ProcessIO.eval_(IOFunctions.lazy(u -> {
+                    TryEffect.f(() -> src.close());
+                    return Unit.unit();
+                })));
+//        ProcessIO.resource(io,
+        IO<Seq<String>> i = runLog(p);
+        try {
+            Seq<String> s = i.run();
+            List<String> l = s.foldLeft((b, a) -> b.cons(a), List.<String>list()).reverse();
+            System.out.println(l);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static Stream<String> lines(BufferedReader r) {
+
+        Validation<IOException, String> v = Try.<String, IOException>f(() -> r.readLine())._1();
+        if (v.isFail()) {
+            return Stream.nil();
+        } else {
+            Option<String> o = Option.fromNull(v.success());
+            if (o.isNone()) {
+                return Stream.nil();
+            } else {
+                return Stream.stream(o.some()).append(P.lazy(u -> {
+                    return lines(r);
+                }));
+            }
+        }
+
+    }
+
+
 
 }
